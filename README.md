@@ -33,6 +33,7 @@ npm run deploy
 
 ## Why Webhook Debugger?
 
+- **✨ NEW: Signature Verification** - Verify webhooks are really from Stripe, GitHub, Slack, etc.
 - **Debug webhooks locally and in production** - See exactly what's being sent
 - **90-day history** - Never lose a webhook again (free: 7 days)
 - **One-click replay** - Forward webhooks to any URL
@@ -46,6 +47,7 @@ npm run deploy
 |---------|------------------|--------------|------------|-------|
 | **Self-hostable** | ✅ Yes | ❌ No | ❌ Deprecated | ⚠️ Tunnel only |
 | **Data privacy** | ✅ Your DB | ❌ Their server | ❌ Public | ⚠️ Local only |
+| **Signature verification** | ✅ Yes | ❌ No | ❌ No | ❌ No |
 | **History retention** | 90 days | 7 days (paid) | 48 hours | Session only |
 | **Full-text search** | ✅ FTS5 | ❌ No | ❌ No | ❌ No |
 | **One-click replay** | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
@@ -60,7 +62,18 @@ npm run deploy
 - **One-Click Replay** - Replay webhooks to any target URL
 - **Full-Text Search** - Search across all webhook payloads
 - **Auto Source Detection** - Automatically identifies Stripe, GitHub, Shopify, Slack, etc.
+- **🔐 Signature Verification (v1.1)** - Verify webhook authenticity with HMAC signatures
 - **GitHub OAuth** - No passwords required
+
+### Supported Signature Formats (v1.1)
+
+| Service | Signature Format | Header |
+|---------|-----------------|--------|
+| Stripe | HMAC-SHA256 + timestamp | `Stripe-Signature` |
+| GitHub | HMAC-SHA256 (sha256=) | `X-Hub-Signature-256` |
+| Slack | HMAC-SHA256 (v0=) | `X-Slack-Signature` |
+| Shopify | HMAC-SHA256 (base64) | `X-Shopify-Hmac-SHA256` |
+| Generic | HMAC-SHA256 | `X-Hub-Signature` / `X-Webhook-Signature` |
 
 ## Tech Stack
 
