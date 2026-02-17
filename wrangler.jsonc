@@ -1,0 +1,41 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "webhook-debugger",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-02-12",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"observability": {
+		"enabled": true
+	},
+	// D1 Database binding - database_id will be set after `wrangler d1 create`
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "webhook-debugger-db",
+			"database_id": "e3e65264-4feb-4820-a37e-a570cc05570b"
+		}
+	],
+	// Environment variables (non-sensitive)
+	"vars": {
+		"GITHUB_CLIENT_ID": "Ov23lizRkpj2eZTdCFUi"
+	},
+	// Secrets (set via `wrangler secret put`)
+	// GITHUB_CLIENT_SECRET - GitHub OAuth app secret
+	// COOKIE_SECRET - Session cookie signing secret
+
+	// Cron trigger for webhook cleanup (runs daily at midnight UTC)
+	"triggers": {
+		"crons": ["0 0 * * *"]
+	},
+	// Dev server configuration
+	"dev": {
+		"port": 8787
+	}
+}

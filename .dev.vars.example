@@ -1,0 +1,13 @@
+# Environment Variables Template
+# Copy this file to .dev.vars and fill in your values
+
+# GitHub OAuth
+# Create at: https://github.com/settings/developers
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+
+# Session Secret (用于 JWT 签名)
+SESSION_SECRET=your_random_secret_key_at_least_32_chars
+
+# Base URL（本地开发时自动使用 wrangler dev 的 tunnel）
+BASE_URL=http://localhost:8787
