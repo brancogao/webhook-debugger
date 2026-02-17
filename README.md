@@ -2,6 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/brancogao/webhook-debugger?style=social)](https://github.com/brancogao/webhook-debugger/stargazers)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+[![D1 Database](https://img.shields.io/badge/D1-SQLite-4479A1?logo=sqlite&logoColor=white)](https://developers.cloudflare.com/d1/)
 
 **The webhook inspector that keeps your data in your own hands.**
 
@@ -34,6 +37,19 @@ npm run deploy
 - **Full-text search** - Find webhooks by content instantly
 - **Auto source detection** - Automatically identifies Stripe, GitHub, Shopify, Slack, etc.
 - **Self-hostable** - Deploy to your own Cloudflare account in 5 minutes
+
+## Comparison
+
+| Feature | Webhook Debugger | Webhook.site | RequestBin | Ngrok |
+|---------|------------------|--------------|------------|-------|
+| **Self-hostable** | ✅ Yes | ❌ No | ❌ Deprecated | ⚠️ Tunnel only |
+| **Data privacy** | ✅ Your DB | ❌ Their server | ❌ Public | ⚠️ Local only |
+| **History retention** | 90 days | 7 days (paid) | 48 hours | Session only |
+| **Full-text search** | ✅ FTS5 | ❌ No | ❌ No | ❌ No |
+| **One-click replay** | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| **Edge deployment** | ✅ Global | ❌ Single region | ❌ No | ❌ No |
+| **Free tier** | ✅ 1 endpoint | ✅ 1 endpoint | ❌ Gone | ✅ Limited |
+| **Cost at scale** | ~$5/mo | $9-49/mo | - | $8-200/mo |
 
 ## Features
 
