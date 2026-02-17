@@ -1,8 +1,30 @@
 # Webhook Debugger
 
-Capture, inspect, and replay webhooks with 90-day history. Built on Cloudflare Workers + D1.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/brancogao/webhook-debugger?style=social)](https://github.com/brancogao/webhook-debugger/stargazers)
 
-**[🚀 Deploy Your Own Instance](#deployment)** • **[📖 Documentation](./DEPLOY.md)**
+**The webhook inspector that keeps your data in your own hands.**
+
+Capture, inspect, and replay webhooks with 90-day history. Self-host on Cloudflare Workers + D1 in 5 minutes.
+
+**[🚀 Quick Deploy](#deployment)** • **[📖 Full Docs](./DEPLOY.md)** • **[🌐 Live Demo](https://webhook-debugger.workers.dev)**
+
+## Quick Demo
+
+```bash
+# 1. Clone and install
+git clone https://github.com/brancogao/webhook-debugger.git
+cd webhook-debugger && npm install
+
+# 2. Set up Cloudflare (free tier works)
+npx wrangler login
+npx wrangler d1 create webhook-debugger-db
+
+# 3. Deploy
+npm run deploy
+
+# Done! Your webhook debugger is live.
+```
 
 ## Why Webhook Debugger?
 
@@ -31,6 +53,8 @@ Capture, inspect, and replay webhooks with 90-day history. Built on Cloudflare W
 - **Search**: SQLite FTS5 full-text search
 
 ## Getting Started
+
+**[📖 Quick Start Guide (3 minutes)](./docs/fullstack/quick-start.md)**
 
 ### Prerequisites
 
@@ -284,7 +308,12 @@ npm test
 
 ## Contributing
 
-This is a solo project by Auto Company. Not accepting external contributions at this time.
+Issues and feature requests welcome! Feel free to open an issue or submit a pull request.
+
+## Support
+
+- **Issues**: https://github.com/brancogao/webhook-debugger/issues
+- **Discussions**: https://github.com/brancogao/webhook-debugger/discussions
 
 ## License
 
