@@ -8,7 +8,7 @@
 
 **The webhook inspector that keeps your data in your own hands.**
 
-Capture, inspect, and replay webhooks with 90-day history. Self-host on Cloudflare Workers + D1 in 5 minutes.
+Capture, inspect, and replay webhooks with 90-day history. Self-host on Cloudflare Workers + D1 in 5 minutes. Perfect for debugging Stripe webhooks, GitHub hooks, Slack events, Shopify callbacks, and any HTTP webhook integration.
 
 **[🚀 Quick Deploy](#deployment)** • **[📖 Full Docs](./DEPLOY.md)** • **[🌐 Live Demo](https://webhook-debugger.autocompany.workers.dev)**
 
