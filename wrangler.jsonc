@@ -19,13 +19,13 @@
 		{
 			"binding": "DB",
 			"database_name": "webhook-debugger-db",
-			"database_id": "YOUR_DATABASE_ID_HERE"
+			"database_id": "e3e65264-4feb-4820-a37e-a570cc05570b"
 		}
 	],
 	// Environment variables (non-sensitive)
 	// Update GITHUB_CLIENT_ID with your GitHub OAuth App client ID
 	"vars": {
-		"GITHUB_CLIENT_ID": "YOUR_GITHUB_CLIENT_ID_HERE"
+		"GITHUB_CLIENT_ID": "Ov23lizRkpj2eZTdCFUi"
 	},
 	// Secrets (set via `wrangler secret put`)
 	// GITHUB_CLIENT_SECRET - GitHub OAuth app secret
