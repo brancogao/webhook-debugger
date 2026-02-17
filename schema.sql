@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS endpoints (
     name TEXT DEFAULT 'Default Endpoint',   -- user-defined name
     path TEXT UNIQUE NOT NULL,              -- /hook/{uuid}
     is_active BOOLEAN DEFAULT TRUE,
+    verification_secret TEXT,                -- HMAC signing secret for signature verification
+    verification_method TEXT DEFAULT 'none', -- none | stripe | github | slack | shopify | generic-hmac
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

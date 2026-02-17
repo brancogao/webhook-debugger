@@ -3,7 +3,14 @@
  */
 
 import { cuid } from '../utils';
-import { getEndpointByPath, createWebhook, getEndpointById, type Webhook } from '../db';
+import { getEndpointByPath, createWebhook, getEndpointById, type Webhook, type Endpoint } from '../db';
+import { verifyWebhookSignature, type VerificationMethod } from '../utils/signature';
+
+// Extended Endpoint type with verification fields
+interface EndpointWithVerification extends Endpoint {
+	verification_secret?: string | null;
+	verification_method?: string | null;
+}
 
 // Detect webhook source from headers
 function detectSource(headers: Headers): string {
@@ -61,6 +68,7 @@ function paramsToJson(params: URLSearchParams): string {
 export interface ReceiveWebhookResult {
 	success: boolean;
 	webhookId?: string;
+	sourceVerified?: boolean;
 	error?: string;
 }
 
@@ -69,8 +77,8 @@ export async function receiveWebhook(
 	path: string,
 	db: D1Database
 ): Promise<ReceiveWebhookResult> {
-	// Find endpoint by path
-	const endpoint = await getEndpointByPath(db, `/hook/${path}`);
+	// Find endpoint by path (with verification fields)
+	const endpoint = await getEndpointByPath(db, `/hook/${path}`) as EndpointWithVerification | null;
 
 	if (!endpoint) {
 		return { success: false, error: 'Endpoint not found' };
@@ -105,6 +113,27 @@ export async function receiveWebhook(
 		// Detect source
 		const source = detectSource(headers);
 
+		// Verify signature if configured
+		let sourceVerified = false;
+		const verificationMethod = endpoint.verification_method as VerificationMethod;
+		const verificationSecret = endpoint.verification_secret;
+
+		if (verificationMethod && verificationMethod !== 'none' && verificationSecret && body) {
+			try {
+				const result = await verifyWebhookSignature(
+					body,
+					headers,
+					verificationMethod,
+					verificationSecret
+				);
+				sourceVerified = result.verified;
+				console.log(`Signature verification: ${result.verified ? 'passed' : 'failed'}`, result.reason);
+			} catch (err) {
+				console.error('Signature verification error:', err);
+				sourceVerified = false;
+			}
+		}
+
 		// Create webhook record
 		const webhookId = cuid();
 		await createWebhook(db, {
@@ -112,6 +141,7 @@ export async function receiveWebhook(
 			endpoint_id: endpoint.id,
 			method,
 			source,
+			source_verified: sourceVerified,
 			headers: headersToJson(headers),
 			body,
 			query_params: paramsToJson(queryParams),
@@ -121,7 +151,7 @@ export async function receiveWebhook(
 			last_replay_response: null,
 		});
 
-		return { success: true, webhookId };
+		return { success: true, webhookId, sourceVerified };
 	} catch (error) {
 		console.error('Error receiving webhook:', error);
 		return { success: false, error: 'Internal server error' };
@@ -156,6 +186,7 @@ export async function handleWebhookRequest(
 		status: 'captured',
 		webhook_id: result.webhookId,
 		endpoint: path,
+		verified: result.sourceVerified ?? false,
 		received_at: new Date().toISOString(),
 	}), {
 		status: 200,

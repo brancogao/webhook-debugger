@@ -110,11 +110,22 @@ export async function handleUpdateEndpoint(request: Request, env: AuthEnv, endpo
 		return error('Endpoint not found', 404);
 	}
 
-	let body: { name?: string; is_active?: boolean } = {};
+	let body: {
+		name?: string;
+		is_active?: boolean;
+		verification_secret?: string;
+		verification_method?: string;
+	} = {};
 	try {
 		body = await request.json();
 	} catch {
 		return error('Invalid JSON body');
+	}
+
+	// Validate verification_method if provided
+	const validMethods = ['none', 'stripe', 'github', 'slack', 'shopify', 'generic-hmac'];
+	if (body.verification_method && !validMethods.includes(body.verification_method)) {
+		return error(`Invalid verification_method. Must be one of: ${validMethods.join(', ')}`);
 	}
 
 	const updated = await updateEndpoint(env.DB, endpointId, body);

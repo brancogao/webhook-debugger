@@ -1,0 +1,14 @@
+name: Webhook Debugger
+description: Self-hosted webhook inspector built on Cloudflare Workers with D1 database, featuring 90-day retention, full-text search, and one-click replay (alternative to webhook.site).
+website_url: https://github.com/brancogao/webhook-debugger
+source_code_url: https://github.com/brancogao/webhook-debugger
+demo_url: https://webhook-debugger.autocompany.workers.dev
+licenses:
+  - MIT
+platforms:
+  - Cloudflare Workers
+  - Nodejs
+tags:
+  - Software Development
+  - Software Development - Testing
+  - Automation

@@ -255,6 +255,8 @@ async function renderEndpointDetail(user, endpointId, params) {
 function renderEndpointDetailContent(endpoint, webhooks) {
   const webhookUrl = `${window.location.origin}/hook/${endpoint.path.replace('/hook/', '')}`;
   const container = document.getElementById('endpoint-detail');
+  const verificationMethod = endpoint.verification_method || 'none';
+  const hasSecret = endpoint.verification_secret && endpoint.verification_secret.length > 0;
 
   container.innerHTML = `
     <!-- Header -->
@@ -279,10 +281,31 @@ function renderEndpointDetailContent(endpoint, webhooks) {
         </div>
       </div>
 
+      <!-- Signature Verification Config -->
+      <div class="bg-white rounded-lg border border-gray-200 p-4 mt-4">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-semibold text-gray-800">Signature Verification</h3>
+          <span class="px-2 py-1 rounded text-xs font-medium ${verificationMethod !== 'none' && hasSecret ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}">
+            ${verificationMethod !== 'none' && hasSecret ? 'Enabled' : 'Disabled'}
+          </span>
+        </div>
+        <p class="text-sm text-gray-600 mb-3">
+          Verify incoming webhooks are from trusted sources using HMAC signatures.
+        </p>
+        <button onclick="showVerificationConfig('${endpoint.id}', '${verificationMethod}', ${hasSecret})"
+                class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+          ${verificationMethod !== 'none' && hasSecret ? 'Update Configuration' : 'Configure Verification'}
+        </button>
+      </div>
+
       <div class="flex gap-6 mt-4">
         <div>
           <span class="text-2xl font-bold text-gray-800">${webhooks.length}</span>
           <p class="text-sm text-gray-500">Total</p>
+        </div>
+        <div>
+          <span class="text-2xl font-bold text-green-600">${webhooks.filter(w => w.source_verified).length}</span>
+          <p class="text-sm text-gray-500">Verified</p>
         </div>
       </div>
     </div>
@@ -370,6 +393,11 @@ function renderWebhookCard(webhook) {
         <span class="text-sm text-gray-500 flex-1">
           ${webhook.source || 'Unknown'}
         </span>
+        ${webhook.source_verified
+          ? `<span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800" title="Signature verified">
+              ✓ Verified
+            </span>`
+          : ''}
         <span class="text-sm text-gray-500">
           ${formatRelativeTime(webhook.received_at)}
         </span>
@@ -451,8 +479,21 @@ function renderWebhookDetailContent(webhook) {
         <span class="text-lg font-semibold text-gray-800">${webhook.source || 'Unknown'}</span>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-500 mb-1">Content Type</label>
-        <span class="text-lg font-semibold text-gray-800">${webhook.content_type || 'Not specified'}</span>
+        <label class="block text-sm font-medium text-gray-500 mb-1">Verification</label>
+        ${webhook.source_verified
+          ? `<span class="inline-flex items-center gap-1 text-lg font-semibold text-green-600">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              Verified
+            </span>`
+          : `<span class="inline-flex items-center gap-1 text-lg font-semibold text-gray-400">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+              Not Verified
+            </span>`
+        }
       </div>
     </div>
 
@@ -696,6 +737,142 @@ window.showTab = showTab;
 window.copyToClipboard = copyToClipboard;
 window.getSourceIcon = getSourceIcon;
 window.formatDate = formatDate;
+window.showVerificationConfig = showVerificationConfig;
+window.closeVerificationModal = closeVerificationModal;
+window.saveVerificationConfig = saveVerificationConfig;
+
+// Verification Configuration Modal
+function showVerificationConfig(endpointId, currentMethod, hasSecret) {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.id = 'verification-modal-backdrop';
+  document.body.appendChild(backdrop);
+
+  const modal = document.createElement('div');
+  modal.className = 'bg-white rounded-lg shadow-xl max-w-lg w-full m-4';
+  modal.innerHTML = `
+    <div class="p-6">
+      <div class="flex justify-between items-start mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Signature Verification</h2>
+        <button onclick="closeVerificationModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Verification Method</label>
+          <select id="verification-method" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+            <option value="none" ${currentMethod === 'none' ? 'selected' : ''}>Disabled</option>
+            <option value="stripe" ${currentMethod === 'stripe' ? 'selected' : ''}>Stripe</option>
+            <option value="github" ${currentMethod === 'github' ? 'selected' : ''}>GitHub</option>
+            <option value="slack" ${currentMethod === 'slack' ? 'selected' : ''}>Slack</option>
+            <option value="shopify" ${currentMethod === 'shopify' ? 'selected' : ''}>Shopify</option>
+            <option value="generic-hmac" ${currentMethod === 'generic-hmac' ? 'selected' : ''}>Generic HMAC-SHA256</option>
+          </select>
+        </div>
+
+        <div id="secret-field" class="${currentMethod === 'none' ? 'hidden' : ''}">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Signing Secret ${hasSecret ? '(leave empty to keep current)' : ''}
+          </label>
+          <input
+            type="password"
+            id="verification-secret"
+            placeholder="${hasSecret ? '••••••••••••••••' : 'Enter your webhook secret'}"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+          />
+          <p class="mt-1 text-xs text-gray-500">
+            The secret key used to sign webhooks. Get this from your service's dashboard.
+          </p>
+        </div>
+
+        <div id="method-help" class="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
+          ${getVerificationHelpText(currentMethod)}
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button onclick="closeVerificationModal()" class="px-4 py-2 text-gray-700 hover:text-gray-900">
+          Cancel
+        </button>
+        <button onclick="saveVerificationConfig('${endpointId}')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+          Save Configuration
+        </button>
+      </div>
+    </div>
+  `;
+  backdrop.appendChild(modal);
+
+  // Close on backdrop click
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) {
+      closeVerificationModal();
+    }
+  });
+
+  // Update help text when method changes
+  document.getElementById('verification-method').addEventListener('change', (e) => {
+    const method = e.target.value;
+    const secretField = document.getElementById('secret-field');
+    const helpText = document.getElementById('method-help');
+
+    if (method === 'none') {
+      secretField.classList.add('hidden');
+    } else {
+      secretField.classList.remove('hidden');
+    }
+    helpText.innerHTML = getVerificationHelpText(method);
+  });
+}
+
+function getVerificationHelpText(method) {
+  const helpTexts = {
+    none: 'Verification is disabled. All webhooks will be accepted without signature validation.',
+    stripe: '<strong>Stripe</strong> uses HMAC-SHA256 with a timestamp. Get your signing secret from the Stripe Dashboard → Developers → Webhooks → Signing secret.',
+    github: '<strong>GitHub</strong> uses HMAC-SHA256 (sha256=). Get your secret from your repository\'s Webhooks settings → Secret.',
+    slack: '<strong>Slack</strong> uses HMAC-SHA256 with a version prefix (v0=). Get your signing secret from your Slack App\'s Basic Information page.',
+    shopify: '<strong>Shopify</strong> uses HMAC-SHA256 in base64 format. Get your secret from your app\'s webhook settings.',
+    'generic-hmac': '<strong>Generic HMAC-SHA256</strong> for custom webhooks. Expects a signature in X-Hub-Signature or X-Webhook-Signature header.',
+  };
+  return helpTexts[method] || helpTexts.none;
+}
+
+function closeVerificationModal() {
+  const backdrop = document.getElementById('verification-modal-backdrop');
+  if (backdrop) {
+    backdrop.remove();
+  }
+}
+
+async function saveVerificationConfig(endpointId) {
+  const method = document.getElementById('verification-method').value;
+  const secretInput = document.getElementById('verification-secret');
+  const secret = secretInput.value;
+
+  // If method is not 'none' and no secret provided (and not updating existing), show error
+  if (method !== 'none' && !secret && !secretInput.placeholder.includes('••••')) {
+    showToast('Please enter a signing secret', 'error');
+    return;
+  }
+
+  try {
+    const updateData = { verification_method: method };
+    if (secret) {
+      updateData.verification_secret = secret;
+    }
+
+    await endpointsApi.update(endpointId, updateData);
+    showToast('Verification configuration saved', 'success');
+    closeVerificationModal();
+    window.location.reload();
+  } catch (err) {
+    console.error('Failed to save verification config:', err);
+    showToast('Failed to save configuration', 'error');
+  }
+}
 
 // Initialize app
 router();

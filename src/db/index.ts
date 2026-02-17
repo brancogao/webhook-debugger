@@ -19,6 +19,8 @@ export interface Endpoint {
 	name: string;
 	path: string;
 	is_active: boolean;
+	verification_secret?: string | null;
+	verification_method?: string | null;
 	created_at: string;
 }
 
@@ -157,7 +159,7 @@ export async function createEndpoint(
 export async function updateEndpoint(
 	db: D1Database,
 	id: string,
-	updates: Partial<Pick<Endpoint, 'name' | 'is_active'>>
+	updates: Partial<Pick<Endpoint, 'name' | 'is_active' | 'verification_secret' | 'verification_method'>>
 ): Promise<Endpoint | null> {
 	const fields: string[] = [];
 	const values: unknown[] = [];
@@ -169,6 +171,14 @@ export async function updateEndpoint(
 	if (updates.is_active !== undefined) {
 		fields.push('is_active = ?');
 		values.push(updates.is_active ? 1 : 0);
+	}
+	if (updates.verification_secret !== undefined) {
+		fields.push('verification_secret = ?');
+		values.push(updates.verification_secret);
+	}
+	if (updates.verification_method !== undefined) {
+		fields.push('verification_method = ?');
+		values.push(updates.verification_method);
 	}
 
 	if (fields.length === 0) return getEndpointById(db, id);
@@ -239,16 +249,17 @@ export async function countWebhooksByEndpointId(
 
 export async function createWebhook(
 	db: D1Database,
-	webhook: Omit<Webhook, 'created_at' | 'received_at' | 'replay_count' | 'source_verified'>
+	webhook: Omit<Webhook, 'created_at' | 'received_at' | 'replay_count'>
 ): Promise<Webhook> {
 	await db.prepare(`
-		INSERT INTO webhooks (id, endpoint_id, method, source, headers, body, query_params, content_type)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO webhooks (id, endpoint_id, method, source, source_verified, headers, body, query_params, content_type)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`).bind(
 		webhook.id,
 		webhook.endpoint_id,
 		webhook.method,
 		webhook.source,
+		webhook.source_verified ? 1 : 0,
 		webhook.headers,
 		webhook.body,
 		webhook.query_params,

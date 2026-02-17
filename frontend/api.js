@@ -63,6 +63,15 @@ export const endpointsApi = {
     api(`/api/endpoints/${id}`, {
       method: 'DELETE',
     }),
+  // Configure signature verification
+  configureVerification: (id, method, secret) =>
+    api(`/api/endpoints/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        verification_method: method,
+        verification_secret: secret,
+      }),
+    }),
 };
 
 /**
