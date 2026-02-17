@@ -83,20 +83,44 @@ cat >> "$REPORT_FILE" << EOF
 
 EOF
 
-# Demo site health
+# Demo site health (may timeout in China due to workers.dev DNS pollution)
 echo ""
 echo "=== Demo Site Health ==="
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEMO_URL")
-RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$DEMO_URL")
 
-echo "HTTP Status: $HTTP_STATUS"
-echo "Response Time: ${RESPONSE_TIME}s"
+# Use timeout command to handle DNS blocks more gracefully
+if ! HTTP_STATUS=$(timeout 5 curl -s -o /dev/null -w "%{http_code}" "$DEMO_URL" 2>/dev/null); then
+  HTTP_STATUS="TIMEOUT"
+fi
 
-cat >> "$REPORT_FILE" << EOF
+# Handle empty or 000 responses
+if [ -z "$HTTP_STATUS" ] || [ "$HTTP_STATUS" = "000" ]; then
+  HTTP_STATUS="TIMEOUT"
+fi
+
+if [ "$HTTP_STATUS" = "TIMEOUT" ]; then
+  echo "HTTP Status: TIMEOUT (workers.dev may be blocked in China)"
+  RESPONSE_TIME="N/A"
+  cat >> "$REPORT_FILE" << EOF
+- **HTTP Status**: TIMEOUT (workers.dev may be blocked in China)
+- **Response Time**: N/A
+
+**Note**: Demo site uses *.workers.dev which may be DNS-blocked in mainland China.
+For users in China, either:
+1. Use a VPN
+2. Configure a custom domain in wrangler.jsonc
+
+EOF
+else
+  RESPONSE_TIME=$(timeout 5 curl -s -o /dev/null -w "%{time_total}" "$DEMO_URL" 2>/dev/null || echo "N/A")
+  echo "HTTP Status: $HTTP_STATUS"
+  echo "Response Time: ${RESPONSE_TIME}s"
+
+  cat >> "$REPORT_FILE" << EOF
 - **HTTP Status**: $HTTP_STATUS
 - **Response Time**: ${RESPONSE_TIME}s
 
 EOF
+fi
 
 # Worker deployment status
 echo ""
@@ -155,7 +179,7 @@ if [ "$STAR_GROWTH" ] && [ "$STAR_GROWTH" -gt 10 ]; then
   echo "- Consider posting about growth on social media" | tee -a "$REPORT_FILE"
 fi
 
-if [ "$HTTP_STATUS" != "200" ]; then
+if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "TIMEOUT" ]; then
   echo "- **URGENT**: Demo site not healthy (HTTP $HTTP_STATUS)" | tee -a "$REPORT_FILE"
 fi
 
