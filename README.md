@@ -2,6 +2,17 @@
 
 Capture, inspect, and replay webhooks with 90-day history. Built on Cloudflare Workers + D1.
 
+**[🚀 Deploy Your Own Instance](#deployment)** • **[📖 Documentation](./DEPLOY.md)**
+
+## Why Webhook Debugger?
+
+- **Debug webhooks locally and in production** - See exactly what's being sent
+- **90-day history** - Never lose a webhook again (free: 7 days)
+- **One-click replay** - Forward webhooks to any URL
+- **Full-text search** - Find webhooks by content instantly
+- **Auto source detection** - Automatically identifies Stripe, GitHub, Shopify, Slack, etc.
+- **Self-hostable** - Deploy to your own Cloudflare account in 5 minutes
+
 ## Features
 
 - **Unique Webhook URLs** - Generate unique endpoints instantly
@@ -53,14 +64,31 @@ Capture, inspect, and replay webhooks with 90-day history. Built on Cloudflare W
    wrangler d1 execute webhook-debugger-db --file=./schema.sql --local
    ```
 
-5. **Start dev server**:
+5. **Build frontend**:
+   ```bash
+   npm run build
+   ```
+
+6. **Start dev server**:
    ```bash
    npm run dev
    ```
 
-6. **Open browser**:
+7. **Open browser**:
    - Visit http://localhost:8787
    - Click "Login with GitHub"
+
+### Frontend Development
+
+To work on the frontend separately:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+This will start a Vite dev server on port 3000 with hot reload and proxy to the backend.
 
 ## API Endpoints
 
@@ -89,7 +117,70 @@ Capture, inspect, and replay webhooks with 90-day history. Built on Cloudflare W
 
 ## Deployment
 
-### Production
+### Quick Deploy (5 minutes)
+
+Deploy your own instance to Cloudflare. You'll need:
+- A free [Cloudflare account](https://dash.cloudflare.com/sign-up)
+- A [GitHub account](https://github.com) for OAuth
+
+**Step-by-step:**
+
+1. **Fork this repository**
+
+2. **Clone your fork:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/webhook-debugger.git
+   cd webhook-debugger
+   npm install
+   ```
+
+3. **Login to Cloudflare:**
+   ```bash
+   npx wrangler login
+   ```
+
+4. **Create D1 database:**
+   ```bash
+   npx wrangler d1 create webhook-debugger-db
+   ```
+   Copy the `database_id` from the output.
+
+5. **Update `wrangler.jsonc`:**
+   - Replace `database_id` with your database ID
+   - Change `name` to something unique (e.g., `webhook-debugger-YOUR_USERNAME`)
+
+6. **Initialize database:**
+   ```bash
+   npx wrangler d1 execute webhook-debugger-db --file=./schema.sql --remote
+   ```
+
+7. **Create GitHub OAuth App:**
+   - Go to https://github.com/settings/developers
+   - Click "New OAuth App"
+   - Set Homepage URL to: `https://webhook-debugger-YOUR_USERNAME.workers.dev`
+   - Set Callback URL to: `https://webhook-debugger-YOUR_USERNAME.workers.dev/api/auth/callback`
+   - Copy Client ID and Client Secret
+
+8. **Configure environment:**
+   ```bash
+   # Set the Client ID in wrangler.jsonc under vars.GITHUB_CLIENT_ID
+
+   # Set secrets:
+   echo "YOUR_GITHUB_CLIENT_SECRET" | npx wrangler secret put GITHUB_CLIENT_SECRET
+   openssl rand -base64 32 | npx wrangler secret put COOKIE_SECRET
+   ```
+
+9. **Build and deploy:**
+   ```bash
+   npm run build
+   npm run deploy
+   ```
+
+10. **Done!** Visit `https://webhook-debugger-YOUR_USERNAME.workers.dev`
+
+For detailed instructions, see [DEPLOY.md](./DEPLOY.md).
+
+### Production Checklist
 
 1. **Create remote D1 database**:
    ```bash
@@ -112,10 +203,11 @@ Capture, inspect, and replay webhooks with 90-day history. Built on Cloudflare W
    - Set `GITHUB_CLIENT_ID` in `vars`
    - Update `database_id` from step 1
 
-5. **Deploy**:
+5. **Build and deploy**:
    ```bash
    npm run deploy
    ```
+   This will build the frontend and deploy everything to Cloudflare Workers.
 
 ## Plan Limits
 

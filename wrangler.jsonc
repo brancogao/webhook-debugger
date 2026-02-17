@@ -14,17 +14,18 @@
 	"observability": {
 		"enabled": true
 	},
-	// D1 Database binding - database_id will be set after `wrangler d1 create`
+	// D1 Database binding - update database_id after running `wrangler d1 create webhook-debugger-db`
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "webhook-debugger-db",
-			"database_id": "e3e65264-4feb-4820-a37e-a570cc05570b"
+			"database_id": "YOUR_DATABASE_ID_HERE"
 		}
 	],
 	// Environment variables (non-sensitive)
+	// Update GITHUB_CLIENT_ID with your GitHub OAuth App client ID
 	"vars": {
-		"GITHUB_CLIENT_ID": "Ov23lizRkpj2eZTdCFUi"
+		"GITHUB_CLIENT_ID": "YOUR_GITHUB_CLIENT_ID_HERE"
 	},
 	// Secrets (set via `wrangler secret put`)
 	// GITHUB_CLIENT_SECRET - GitHub OAuth app secret
@@ -37,5 +38,10 @@
 	// Dev server configuration
 	"dev": {
 		"port": 8787
+	},
+	// Static assets - serve public/ directory
+	"assets": {
+		"directory": "./public",
+		"binding": "ASSETS"
 	}
 }

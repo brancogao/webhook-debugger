@@ -31,6 +31,7 @@ import { cuid } from './utils';
 // Extend Env type
 interface Env extends AuthEnv {
 	ENVIRONMENT: string;
+	ASSETS: Fetcher;
 }
 
 // CORS headers for API
@@ -75,6 +76,34 @@ export default {
 		// Handle CORS preflight
 		if (request.method === 'OPTIONS') {
 			return new Response(null, { status: 204, headers: corsHeaders });
+		}
+
+		// ========== Static Assets ==========
+		// Try to serve from ASSETS binding first
+		if (env.ASSETS) {
+			try {
+				const assetResponse = await env.ASSETS.fetch(request);
+				// If asset exists (status 200), return it
+				if (assetResponse.status === 200) {
+					return assetResponse;
+				}
+			} catch {
+				// Fall through to Workers routes
+			}
+		}
+
+		// For SPA routes (non-API, non-webhook), return index.html
+		if (!pathname.startsWith('/api/') && !pathname.startsWith('/hook/')) {
+			if (env.ASSETS) {
+				try {
+					const indexResponse = await env.ASSETS.fetch(new Request(`${url.origin}/index.html`, request));
+					if (indexResponse.status === 200) {
+						return indexResponse;
+					}
+				} catch {
+					// Fallback to Workers response
+				}
+			}
 		}
 
 		// ========== Health Check ==========
@@ -205,18 +234,13 @@ export default {
 			return handleReplayWebhook(request, env, match.id);
 		}
 
-		// ========== Static Assets (handled by Cloudflare) ==========
-		// For /dashboard and other frontend routes, serve index.html
-		// This is handled by the assets configuration in wrangler.jsonc
-
 		// ========== Fallback ==========
 		// API 404
 		if (pathname.startsWith('/api/')) {
 			return json({ error: 'Not found' }, 404);
 		}
 
-		// For non-API routes, serve the SPA (handled by assets)
-		// Return a simple placeholder for now
+		// Return simple HTML as fallback
 		return new Response(
 			`<!DOCTYPE html>
 <html lang="en">

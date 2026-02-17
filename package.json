@@ -3,9 +3,11 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"deploy": "wrangler deploy",
+		"deploy": "npm run build && wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
+		"build": "cd frontend && npm run build",
+		"dev:frontend": "cd frontend && npm run dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types"
 	},
