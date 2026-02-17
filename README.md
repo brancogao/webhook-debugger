@@ -7,7 +7,7 @@
 
 Capture, inspect, and replay webhooks with 90-day history. Self-host on Cloudflare Workers + D1 in 5 minutes.
 
-**[🚀 Quick Deploy](#deployment)** • **[📖 Full Docs](./DEPLOY.md)** • **[🌐 Live Demo](https://webhook-debugger.workers.dev)**
+**[🚀 Quick Deploy](#deployment)** • **[📖 Full Docs](./DEPLOY.md)** • **[🌐 Live Demo](https://webhook-debugger.autocompany.workers.dev)**
 
 ## Quick Demo
 
