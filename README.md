@@ -1,4 +1,6 @@
-# Webhook Debugger
+# Webhook Debugger - Self-Hosted Webhook Inspector for Stripe, GitHub, Shopify & More
+
+> **Debug Stripe webhooks, GitHub hooks, Slack events, Shopify callbacks, and any HTTP webhook integration.** Self-host on Cloudflare Workers with 90-day history and full-text search.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/brancogao/webhook-debugger?style=social)](https://github.com/brancogao/webhook-debugger/stargazers)
@@ -8,7 +10,7 @@
 
 **The webhook inspector that keeps your data in your own hands.**
 
-Capture, inspect, and replay webhooks with 90-day history. Self-host on Cloudflare Workers + D1 in 5 minutes. Perfect for debugging Stripe webhooks, GitHub hooks, Slack events, Shopify callbacks, and any HTTP webhook integration.
+Capture, inspect, and replay webhooks with 90-day history. Self-host on Cloudflare Workers + D1 in 5 minutes.
 
 **[🚀 Quick Deploy](#deployment)** • **[📖 Full Docs](./DEPLOY.md)** • **[🌐 Live Demo](https://webhook-debugger.autocompany.workers.dev)**
 
@@ -334,6 +336,33 @@ Issues and feature requests welcome! Feel free to open an issue or submit a pull
 ## License
 
 MIT
+
+---
+
+## Keywords & Related Projects
+
+**Webhook Debugger** is designed for developers who need:
+
+- **Stripe webhook debugging** - Test and inspect Stripe payment webhooks locally
+- **GitHub webhook testing** - Debug GitHub App and OAuth App webhooks
+- **Shopify webhook inspector** - Monitor Shopify store events and order webhooks
+- **Slack event debugging** - Test Slack bot events and slash commands
+- **Twilio webhook testing** - Debug SMS and voice call callbacks
+- **Generic HTTP webhook inspection** - Capture any POST/GET webhook payload
+
+**Alternatives compared:**
+- [webhook.site](https://webhook.site) - Similar but not self-hostable, data on third-party servers
+- [RequestBin](https://requestbin.com) - Deprecated, no longer maintained
+- [ngrok](https://ngrok.com) - Tunnel tool, not a webhook inspector
+- [Beeceptor](https://beeceptor.com) - Mock API, different use case
+
+**Related searches:**
+- self-hosted webhook inspector
+- webhook debugger cloudflare workers
+- stripe webhook testing tool
+- github webhook debug
+- webhook inspector open source
+- webhook viewer self-hosted
 
 ---
 
